@@ -74,6 +74,9 @@ class GUI:
         self.extract_product_ids()
 
     def extract_product_ids(self):
+        if len(self.orders) > 0:
+            self.printing_feedback("------------------------------New PDF File Selected-----------------------------")
+            self.orders = {}
         for page_num in range(self.pdf_file.page_count):
             page = self.pdf_file[page_num]
             text = page.get_text().splitlines()
@@ -84,7 +87,7 @@ class GUI:
             product_id = product_id[:end_index if end_index != -1 else len(product_id)]
             self.orders[product_id].append([page_num + 1, False]) if product_id in self.orders else self.orders.update({product_id: [[page_num + 1, False]]})
         self.pdf_file.close()
-        print(self.orders)
+        
 
 
     def find_print_label(self,event=None):
