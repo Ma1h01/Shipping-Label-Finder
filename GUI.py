@@ -106,7 +106,7 @@ class GUI:
                     page_num = self.orders[target_id][i][0]
                     self.orders[target_id][i][1] = True
                     self.printing_feedback(f"Printing page {page_num}, product id {target_id}: {i + 1} of {len(self.orders[target_id])}")
-                    subprocess.run(["lp", "-d", self.printer_var.get(), "-o", f"page-ranges={page_num}", "-o", "print-quality=5", "-o", "orientation-requested=6",self.pdf_file_path])
+                    # subprocess.run(["lp", "-d", self.printer_var.get(), "-o", f"page-ranges={page_num}", "-o", "print-quality=5", "-o", "orientation-requested=6",self.pdf_file_path])
                     self.update_print_count(self.print_count + 1)
                     break
             # if all labels for the product have been printed. The else block will be executed only if the for loop completes without breaking
@@ -115,10 +115,10 @@ class GUI:
                 if result:
                     for i in range(len(self.orders[target_id])):
                         self.orders[target_id][i][1] = False
-                    self.printing_feedback(f"All labels for product {target_id} have been printed. Printing again...")
+                    self.printing_feedback(f"All labels for product {target_id} have been printed. Chose to print again.")
                     self.update_print_count(self.print_count - len(self.orders[target_id]))
                 else:
-                    self.printing_feedback(f"All labels for this product {target_id} have been printed. Will Not print again.")
+                    self.printing_feedback(f"All labels for product {target_id} have been printed. Chose Not to print again.")
 
         else:
             self.printing_feedback(f"Product {target_id} not found")
