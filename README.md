@@ -5,7 +5,7 @@ This Python script reduces e-commerce retailers' hassle of shuffling around hund
 ## How To Use
 1. Select and run ```GUI.py```.
    
-2. Select a UPS shipping label PDF in the menu. (Users must ensure their shipping labels include a product ID at the bottom. See the highlight in this <a>example</a>)
+2. Select a UPS shipping label PDF in the menu. (Users must ensure their shipping labels include a product ID at the bottom. See the highlight in the example ```/images/Shipping_Label_Example.pdf```)
    
 3. Select a printer in the menu. (Users must ensure the printer is properly connected via USB/Bluetooth)
    
