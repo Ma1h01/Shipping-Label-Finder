@@ -13,6 +13,13 @@ class GUI:
         self.root.title("Swift Label Matcher")
         self.root.geometry("800x600")
 
+        self.pdf_file_path = None
+        self.pdf_file = None
+        self.orders = {}
+        self.print_count = 0
+        # a global variable to store the selected printer
+        self.printer_var = tk.StringVar()
+
         # set the menu
         self.menu = tk.Menu(self.root)
         self.file_menu = tk.Menu(self.menu)
@@ -25,18 +32,13 @@ class GUI:
         self.menu.add_cascade(label="Printer", menu=self.printer_menu)
         self.printer_submenu = tk.Menu(self.printer_menu)
         self.printer_menu.add_cascade(label="Select Printer", menu=self.printer_submenu)
-        # a global variable to store the selected printer
-        self.printer_var = tk.StringVar()
-        self.printer_var.set(None)
         self.display_all_printers()
         self.root.config(menu=self.menu)
         
         self.selected_printer_label_frame = tk.Frame(self.root)
         self.selected_printer_label_frame.pack()
-        self.selected_printer_label = tk.Label(self.selected_printer_label_frame, text="Selected Printer:")
+        self.selected_printer_label = tk.Label(self.selected_printer_label_frame, text="Selected Printer: None")
         self.selected_printer_label.grid(row=0, column=0)
-        self.selected_printer_name_label = tk.Label(self.selected_printer_label_frame, textvariable=self.printer_var)
-        self.selected_printer_name_label.grid(row=0, column=1)
 
         self.file_path_label = tk.Label(self.root, text="PDF File Path: None")
         self.file_path_label.pack()
@@ -44,7 +46,6 @@ class GUI:
         self.main_frame = tk.Frame(self.root)
         self.main_frame.pack(pady=10)
         
-
         self.user_input_label = tk.Label(self.main_frame, text="Enter Product ID:")
         self.user_input_label.grid(row=0, column=0)
 
@@ -56,13 +57,12 @@ class GUI:
         self.summary_button = tk.Button(self.main_frame, text="Summary", command=self.show_printing_summary)
         self.summary_button.grid(row=0, column=2, padx=30)
 
+        self.print_count_label = tk.Label(self.main_frame, text="Print Count: 0")
+        self.print_count_label.grid(row=1, column=0)
+
         self.feedback = tk.Text(self.root, state=tk.DISABLED)
         self.feedback.config(height=40)
         self.feedback.pack()
-
-        self.pdf_file_path = None
-        self.pdf_file = None
-        self.orders = {}
 
 
         self.root.mainloop()
@@ -74,6 +74,10 @@ class GUI:
         self.extract_product_ids()
 
     def extract_product_ids(self):
+        if len(self.orders) > 0:
+            self.printing_feedback("------------------------------New PDF File Selected-----------------------------")
+            self.orders = {}
+            self.update_print_count(0)
         for page_num in range(self.pdf_file.page_count):
             page = self.pdf_file[page_num]
             text = page.get_text().splitlines()
@@ -84,11 +88,11 @@ class GUI:
             product_id = product_id[:end_index if end_index != -1 else len(product_id)]
             self.orders[product_id].append([page_num + 1, False]) if product_id in self.orders else self.orders.update({product_id: [[page_num + 1, False]]})
         self.pdf_file.close()
-        print(self.orders)
+        
 
 
     def find_print_label(self,event=None):
-        if self.printer_var.get() == 'None':
+        if len(self.printer_var.get()) == 0:
             messagebox.showerror("Printer Not Selected", "Please select a printer first")
             return
         if self.pdf_file == None:
@@ -102,7 +106,8 @@ class GUI:
                     page_num = self.orders[target_id][i][0]
                     self.orders[target_id][i][1] = True
                     self.printing_feedback(f"Printing page {page_num}, product id {target_id}: {i + 1} of {len(self.orders[target_id])}")
-                    subprocess.run(["lp", "-d", self.printer_var.get(), "-o", f"page-ranges={page_num}", "-o", "print-quality=5", "-o", "orientation-requested=6",self.pdf_file_path])
+                    # subprocess.run(["lp", "-d", self.printer_var.get(), "-o", f"page-ranges={page_num}", "-o", "print-quality=5", "-o", "orientation-requested=6",self.pdf_file_path])
+                    self.update_print_count(self.print_count + 1)
                     break
             # if all labels for the product have been printed. The else block will be executed only if the for loop completes without breaking
             else:
@@ -110,9 +115,10 @@ class GUI:
                 if result:
                     for i in range(len(self.orders[target_id])):
                         self.orders[target_id][i][1] = False
-                    self.printing_feedback(f"All labels for product {target_id} have been printed. Printing again...")
+                    self.printing_feedback(f"All labels for product {target_id} have been printed. Chose to print again.")
+                    self.update_print_count(self.print_count - len(self.orders[target_id]))
                 else:
-                    self.printing_feedback("All labels for this product have been printed. Will Not print again.")
+                    self.printing_feedback(f"All labels for product {target_id} have been printed. Chose Not to print again.")
 
         else:
             self.printing_feedback(f"Product {target_id} not found")
@@ -155,6 +161,9 @@ class GUI:
     def display_all_printers(self):
         printer_list = self.get_available_printers()
         for printer in printer_list:
-            self.printer_submenu.add_radiobutton(label=printer, variable=self.printer_var, value=printer)
+            self.printer_submenu.add_radiobutton(label=printer, variable=self.printer_var, value=printer, command=lambda: self.selected_printer_label.config(text="Selected Printer: " + self.printer_var.get()))
 
+    def update_print_count(self, new_count):
+        self.print_count = new_count
+        self.print_count_label.config(text=f"Print Count: {self.print_count}")
 GUI()
