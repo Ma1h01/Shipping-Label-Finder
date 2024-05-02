@@ -10,12 +10,16 @@ This Python script reduces e-commerce retailers' hassle of shuffling around hund
 3. Select a printer in the menu. (Users must ensure the printer is properly connected via USB/Bluetooth)
    
 4. Everything is all set. Start entering the product ID in the prompt.
+
 ## Updates
+## 2024-05-02
+- Added the Sort&Save feature, which sorts the selected PDF by its product ids and creates a sorted PDF.
+
 ### 2024-03-23
-- Created the GUI for the program
-- Got rid of the order summary spreadsheet requirement, and only the UPS shipping labels PDF is required
+- Created the GUI for the program.
+- Got rid of the order summary spreadsheet requirement, and only the UPS shipping labels PDF is required.
   
 ### 2024-02-24
-- Used pandas to process the order summary spreadsheet instead of solely reading the shipping label pdf
-- Able to correctly match shipping labels that contain multiple products or multiple quantities of the same product
-- The order summary spreadsheet must follow a pre-established format for the program to run properly
+- Used pandas to process the order summary spreadsheet instead of solely reading the shipping label PDF.
+- Able to correctly match shipping labels that contain multiple products or multiple quantities of the same product.
+- The order summary spreadsheet must follow a pre-established format for the program to run properly.

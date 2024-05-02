@@ -57,6 +57,9 @@ class GUI:
         self.summary_button = tk.Button(self.main_frame, text="Summary", command=self.show_printing_summary)
         self.summary_button.grid(row=0, column=2, padx=30)
 
+        self.save_button = tk.Button(self.main_frame, text="Save", command=self.save_pdf)
+        self.save_button.grid(row=1, column=2)
+
         self.print_count_label = tk.Label(self.main_frame, text="Print Count: 0")
         self.print_count_label.grid(row=1, column=0)
 
@@ -74,6 +77,7 @@ class GUI:
         self.extract_product_ids()
 
     def extract_product_ids(self):
+        # Check if a valid PDF file has selected before
         if len(self.orders) > 0:
             self.printing_feedback("------------------------------New PDF File Selected-----------------------------")
             self.orders = {}
@@ -81,12 +85,14 @@ class GUI:
         for page_num in range(self.pdf_file.page_count):
             page = self.pdf_file[page_num]
             text = page.get_text().splitlines()
-            # the product id is the second to last or last element in the list
+            # The product id is the second to last or last element in the list
+            # A valid product id must be alphanumeric
             product_id = text[-2] if any(char.isalpha() for char in text[-2]) else text[-1]
             # the product id could make up of multiple ids, we only consider the first one
+            # One page could have multiple product ids(e.g. SXL023*2+SXL024*1), and we use the first one as a identifier
             end_index = product_id.find('*')
             product_id = product_id[:end_index if end_index != -1 else len(product_id)]
-            self.orders[product_id].append([page_num + 1, False]) if product_id in self.orders else self.orders.update({product_id: [[page_num + 1, False]]})
+            (self.orders[product_id].append([page_num + 1, False])) if product_id in self.orders else (self.orders.update({product_id: [[page_num + 1, False]]}))
         self.pdf_file.close()
         
 
@@ -166,4 +172,28 @@ class GUI:
     def update_print_count(self, new_count):
         self.print_count = new_count
         self.print_count_label.config(text=f"Print Count: {self.print_count}")
+        
+    def sort_pdf_by_product_id(self, path):
+        self.pdf_file = fitz.open(self.pdf_file_path)
+        saved_pdf_file = fitz.open() # An empty PDF file to store the sorted pages
+        sorted_product_id_list = sorted(self.orders.keys())
+        # print(f"Before sorting: {self.orders.keys()}")
+        # print(f"After sorting: {sorted_product_id_list}")
+        for product_id in sorted_product_id_list:
+            for page_num, _ in self.orders[product_id]:
+                # page_num is 1-indexed, and to_page is inclusive
+                saved_pdf_file.insert_pdf(self.pdf_file, from_page=page_num - 1, to_page=page_num - 1)
+        saved_pdf_file.save(path)
+        self.pdf_file.close()
+        saved_pdf_file.close()
+
+    def save_pdf(self):
+        if self.pdf_file == None:
+            messagebox.showerror("PDF File Not Selected", "Please select a PDF file first")
+            return
+        # "asksaveasfilename" returns an abosolute path to the file
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+        if file_path == "":
+            return
+        self.sort_pdf_by_product_id(file_path)
 GUI()
