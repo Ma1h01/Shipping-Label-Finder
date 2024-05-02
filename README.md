@@ -12,7 +12,7 @@ This Python script reduces e-commerce retailers' hassle of shuffling around hund
 4. Everything is all set. Start entering the product ID in the prompt.
 
 ## Updates
-## 2024-05-02
+### 2024-05-02
 - Added the Sort&Save feature, which sorts the selected PDF by its product ids and creates a sorted PDF.
 
 ### 2024-03-23
