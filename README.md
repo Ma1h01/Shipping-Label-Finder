@@ -15,6 +15,9 @@ This Python script reduces e-commerce retailers' hassle of shuffling around hund
 4. Everything is all set. Start entering the product ID in the prompt.
 
 ## Updates
+### 2024-08-24
+- Used regex to extract the product ID from the label in order to cover various ID formats, and added total labels count in the Printing Summary window.
+
 ### 2024-08-11
 - Updated the Sort&Save feature to first sort the selected PDF by the identifier product ID in each page, then sort by the number of the identifier products present in each page.
 

@@ -4,8 +4,9 @@ from tkinter import messagebox
 from tkinter import ttk
 import fitz
 from tkinter import filedialog
+import re
 
-
+SKU_PATTERN = r"[A-Z][A-Z\s\*\-\+\d]*\d+[A-Z\s\*\-\+\d]*$"
 
 class GUI:
     def __init__(self):
@@ -66,8 +67,7 @@ class GUI:
 
         self.feedback = tk.Text(self.root, state=tk.DISABLED)
         self.feedback.config(height=40)
-        self.feedback.pack()
-
+        self.feedback.pack()        
 
         self.root.mainloop()
 
@@ -90,8 +90,8 @@ class GUI:
             page = self.pdf_file[page_num]
             text = page.get_text().splitlines()
             # The product id is the second to last or last element in the list
-            # A valid product id must be alphanumeric
-            product_id = text[-2] if any(char.isalpha() for char in text[-2]) else text[-1]
+            # A valid product id must contain all capital letters, numbers, and optional special characters such as * or -
+            product_id = text[-2] if re.match(SKU_PATTERN, text[-2]) else text[-1]    
             # how many products are there for this product_id in this page
             product_count = 1         
             # One page could have multiple product ids(e.g. SXL023*2+SXL024*1), and we use the first one as a identifier
@@ -157,6 +157,12 @@ class GUI:
         dialog = tk.Toplevel()
         dialog.title("Printing Summary")
 
+        # Display total labels
+        total = sum(len(self.orders[product_id]) for product_id in self.orders)
+        total_label = tk.Label(dialog, text=f"Total Labels: {total}")
+        total_label.pack()
+
+        # Display printing summary of each product in table
         tree = ttk.Treeview(dialog, columns=("Product ID", "Printed", "Total"))
         # Hide the first column (tree column)
         tree.column("#0", width=0, stretch=tk.NO)
